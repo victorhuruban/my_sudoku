@@ -1,4 +1,3 @@
-import keyboard
 import sqlite3
 import tkinter
 from tkinter.font import Font
@@ -89,8 +88,6 @@ class Sudoku(object):
             self.sudoku_sample = self.sudoku_loader(s_game)
         cursor.close()
         db.close()
-        
-        
 
         ### FONT FOR THE VALUES IN THE SUDOKU FRAMES / BUTTON ###
         font_test = Font(family="Times New Roman", size=20, weight="bold")
@@ -276,8 +273,8 @@ class Sudoku(object):
             pady=0,
             sticky="n"
             )
-            # GENERATE FRAME / BUTTON
-            
+        
+        # GENERATE FRAME / BUTTON    
         option_list = [
             "easy",
             "medium",
@@ -294,7 +291,7 @@ class Sudoku(object):
             column=0
             )
 
-            # GENERATE FRAME / DROPDOWN
+        # GENERATE FRAME / DROPDOWN
         dropdown_list = tkinter.OptionMenu(generate_frame, self.variable, *option_list)
         dropdown_list.config(width=6)
         dropdown_list.grid(
@@ -314,7 +311,7 @@ class Sudoku(object):
             sticky="nw"
             )
 
-            # GENERATE NUMPAD
+        # GENERATE KEYPAD AND LABEL BELOW TO KEEP TRACK OF WHAT IS SELECTED
         for col in range(0,3):
             for row in range(0,4):
                 keypad_frame.rowconfigure(row, weight=1)
@@ -334,7 +331,7 @@ class Sudoku(object):
         self.holder_label = tkinter.Label(keypad_frame, text="Nothing yet", relief="groove")
         self.holder_label.grid(row=4, column=0, columnspan=3, sticky="ews", pady=25)
 
-            ### SOLVE / CHECK BUTTONS ###
+        ### SOLVE / CHECK BUTTONS ###
         cs_frame = tkinter.Frame(self.main_window, bg="#E4E4E4")
         cs_frame.grid(
             row=2,
@@ -369,20 +366,21 @@ class Sudoku(object):
         
         self.main_window.mainloop()
 
+    ### METHOD THAT CONTROLS THE BEHAVIOUR OF BUTTONS FROM THE SUDOKU FRAME ###
     def onClickSudoku(self, text, btn):
-        if btn['text'] == "" or btn['bg'] == '#E4E4E4':
+        if btn['text'] == "" or btn['bg'] == '#E4E4E4': # IF THE BUTTON IS NOT BLANK, YOU ARE ABLE TO INTERACT WITH IT/ IF NOT, YOU CANNOT MODIFY THE SELECTED BUTTON #
             print(btn['text'])
             split_l = text.split(" ")
             val = self.sudoku_sample[int(split_l[0])][int(split_l[1])]
             self.holder_label['text'] = "{} : pos {}|{}".format(val, int(split_l[0]) + 1, int(split_l[1]) + 1)
-            if not self.holder:
+            if not self.holder: # IF YOU HAVEN'T SELECTED ANY BUTTON #
                 self.holder.append(val)
                 self.holder.append(int(split_l[0]))
                 self.holder.append(int(split_l[1]))
                 btn['bg'] = "#E4E4E4"
                 btn['relief'] = "sunken"
                 self.holder.append(btn)
-            else:
+            else: # IF YOU HAVE SELECTED A BUTTON #
                 self.holder[3]['bg'] = "white"
                 self.holder[3]['relief'] = "raised"
                 self.holder.clear()
@@ -394,6 +392,7 @@ class Sudoku(object):
                 self.holder.append(btn)
         
 
+    ### METHOD THAT CONTROLS THE BEHAVIOUR OF THE KEYPAD BUTTONS ###
     def onClickKeypadNums(self, text):
         if self.holder:
             self.holder[3]['text'] = int(text)
@@ -403,6 +402,7 @@ class Sudoku(object):
             self.holder.clear()
             self.holder_label['text'] = ""
 
+    ### METHOD THAT CONTROLS THE BEHAVIOUR OF THE DELETE BUTTON FROM THE KEYPAD FRAME ###
     def onClickKeypadDelete(self, text):
         if self.holder:
             self.holder[3]['text'] = ""
@@ -412,12 +412,17 @@ class Sudoku(object):
             self.holder.clear()
             self.holder_label['text'] = ""
 
+    ### METHOD THAT WILL CONTROL THE KEYBOARD INPUTS (WILL SOON BE UPDATED) ###
     def keyboardInput(self):
         args = event
- 
+
+    ### METHOD THAT TRIES TO SOLVE THE CURRENT GAME (IS ONLY WORKING FOR EASY AND MEDIUM DIFFICULTY GAMES, WILL SOON BE UPDATED) ###
     def solveGame(self):
         print("Try solve")
 
+    ### METHOD THAT CHECKS THE CURRENT GAME STATE (CHECKS IF THE GAME IS CORRECTLY FILLED OR NOT) ###
+        # if the game is solved correctly, the canvas is filled with the color 'blue'
+        # if the game is solved incorrectly, the canvas is filled with the color 'red'
     def sudoku_checker(self, arr):
         # CHECK ROWS
         for row in range(0, 9):
@@ -430,6 +435,7 @@ class Sudoku(object):
                 s_column.add(arr[column][row])
             if len(s_column) != 9: return False
 
+        # CHECKS EACH INDIVIDUAL MATRIX
         for row in range(0, 9, 3):
             for column in range(0, 9, 3):
                 check_set = set()
@@ -439,6 +445,7 @@ class Sudoku(object):
                 if len(check_set) != 9: return False
         return True
 
+    ### THE METHOD THAT ACTUALLY CHANGES THE CANVAS COLOR BASED ON THE 'sudoku_checker' OUTPUT ###
     def checkGame(self):
         if self.sudoku_checker(self.sudoku_sample):
             self.oval = self.c_canvas.create_oval(60,30,160,130, fill="blue")
@@ -447,6 +454,7 @@ class Sudoku(object):
             self.oval = self.c_canvas.create_oval(60,30,160,130, fill="red")
             self.game_state = False
 
+    ### METHOD THAT LOADS THE SUDOKU GAME INTO THE LIST WHICH HOLDS THE GAME ###
     def sudoku_loader(self, sudoku_strng):
         arr_ret = [[],[],[],[],[],[],[],[],[]]
         count = 0
@@ -457,10 +465,12 @@ class Sudoku(object):
 
         return arr_ret
 
+    ### METHOD THAT BRINGS BACK THE MAINFRAME AFTER IT WAS HIDDEN BY PRESSING THE 'GENERATE' BUTTON ###
     def bringBack(self):
         self.main_window.update()
         self.main_window.deiconify()
 
+    ### THE WINDOW THAT POPS UP AFTER PRESSING THE 'GENERATE' BUTTON ###
     def popUp(self):
         if not self.game_state:
             win = tkinter.Toplevel()
@@ -476,7 +486,7 @@ class Sudoku(object):
             no = ttk.Button(win, text="No", command=lambda: [win.destroy(), self.bringBack()])
             no.grid(row=1, column=0, sticky="e")
 
-
+    ### METHOD THAT IS FILLING THE BUTTONS ON THE WINDOW ###
     def generateSudoku(self, variable):
         db = sqlite3.connect("sudoku_db.sqlite")
         cursor = db.cursor().execute("SELECT * FROM s_{} ORDER BY RANDOM() LIMIT 1".format(variable))
@@ -578,8 +588,8 @@ class Sudoku(object):
         cursor.close()
         db.close()
 
+    ### METHOD THAT IS CONVERTING THE NUMBER 0 TO A BLANK SPACE ###
     def displayButton(self, num):
-        
         if int(num) == 0:
             return ""
         else:
